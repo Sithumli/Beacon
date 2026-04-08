@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package a2a;
+
+option go_package = "github.com/Sithumli/Beacon/api/proto;proto";
+
+import "api/proto/common.proto";
+
+// RegistryService handles agent registration and discovery
+service RegistryService {
+  // Register a new agent
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+
+  // Deregister an agent
+  rpc Deregister(DeregisterRequest) returns (DeregisterResponse);
+
+  // Get agent by ID
+  rpc GetAgent(GetAgentRequest) returns (GetAgentResponse);
+
+  // List all agents
+  rpc ListAgents(ListAgentsRequest) returns (ListAgentsResponse);
+
+  // Discover agents by capability
+  rpc Discover(DiscoverRequest) returns (DiscoverResponse);
+
+  // Send heartbeat to keep agent alive
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+
+  // Watch for agent changes (streaming)
+  rpc Watch(WatchRequest) returns (stream WatchResponse);
+}
+
+message RegisterRequest {
+  string name = 1;
+  string version = 2;
+  string description = 3;
+  Endpoint endpoint = 4;
+  repeated Capability capabilities = 5;
+  Metadata metadata = 6;
+}
+
+message RegisterResponse {
+  string agent_id = 1;
+  Agent agent = 2;
+}
+
+message DeregisterRequest {
+  string agent_id = 1;
+}
+
+message DeregisterResponse {
+  bool success = 1;
+}
+
+message GetAgentRequest {
+  string agent_id = 1;
+}
+
+message GetAgentResponse {
+  Agent agent = 1;
+}
+
+message ListAgentsRequest {
+  AgentStatus status = 1;
+  string capability = 2;
+  repeated string tags = 3;
+}
+
+message ListAgentsResponse {
+  repeated Agent agents = 1;
+}
+
+message DiscoverRequest {
+  string capability = 1;
+}
+
+message DiscoverResponse {
+  repeated Agent agents = 1;
+}
+
+message HeartbeatRequest {
+  string agent_id = 1;
+}
+
+message HeartbeatResponse {
+  bool success = 1;
+  AgentStatus status = 2;
+}
+
+message WatchRequest {
+  // Optional filter for specific capabilities
+  repeated string capabilities = 1;
+}
+
+message WatchResponse {
+  enum EventType {
+    EVENT_TYPE_UNSPECIFIED = 0;
+    EVENT_TYPE_REGISTERED = 1;
+    EVENT_TYPE_DEREGISTERED = 2;
+    EVENT_TYPE_UPDATED = 3;
+    EVENT_TYPE_HEALTH_CHANGED = 4;
+  }
+  EventType event = 1;
+  Agent agent = 2;
+}

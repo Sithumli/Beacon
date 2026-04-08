@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  a2a-server:
+    build: .
+    container_name: a2a-server
+    ports:
+      - "50051:50051"  # gRPC
+      - "8080:8080"    # HTTP Dashboard
+    volumes:
+      - a2a-data:/data
+    environment:
+      - TZ=UTC
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Example: Echo agent
+  echo-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+      args:
+        AGENT_PATH: ./examples/echo-agent
+    container_name: echo-agent
+    depends_on:
+      a2a-server:
+        condition: service_healthy
+    environment:
+      - A2A_SERVER=a2a-server:50051
+      - AGENT_HOST=echo-agent
+      - AGENT_PORT=50052
+    expose:
+      - "50052"
+    restart: unless-stopped
+
+volumes:
+  a2a-data:

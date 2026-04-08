@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package a2a;
+
+option go_package = "github.com/Sithumli/Beacon/api/proto;proto";
+
+import "google/protobuf/timestamp.proto";
+
+// Schema represents a JSON schema for validation
+message Schema {
+  string type = 1;
+  map<string, Schema> properties = 2;
+  repeated string required = 3;
+  Schema items = 4;
+}
+
+// Capability represents an agent's ability
+message Capability {
+  string name = 1;
+  string description = 2;
+  Schema input_schema = 3;
+  Schema output_schema = 4;
+}
+
+// Endpoint represents agent connection details
+message Endpoint {
+  string host = 1;
+  int32 port = 2;
+  string protocol = 3;
+}
+
+// Metadata contains optional agent metadata
+message Metadata {
+  string author = 1;
+  repeated string tags = 2;
+}
+
+// AgentStatus represents agent health
+enum AgentStatus {
+  AGENT_STATUS_UNSPECIFIED = 0;
+  AGENT_STATUS_HEALTHY = 1;
+  AGENT_STATUS_UNHEALTHY = 2;
+  AGENT_STATUS_UNKNOWN = 3;
+}
+
+// Agent represents a registered agent
+message Agent {
+  string id = 1;
+  string name = 2;
+  string version = 3;
+  string description = 4;
+  Endpoint endpoint = 5;
+  repeated Capability capabilities = 6;
+  Metadata metadata = 7;
+  AgentStatus status = 8;
+  google.protobuf.Timestamp registered_at = 9;
+  google.protobuf.Timestamp last_heartbeat = 10;
+}
+
+// TaskStatus represents task state
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_PENDING = 1;
+  TASK_STATUS_RUNNING = 2;
+  TASK_STATUS_COMPLETED = 3;
+  TASK_STATUS_FAILED = 4;
+  TASK_STATUS_CANCELLED = 5;
+}
+
+// Task represents a unit of work
+message Task {
+  string id = 1;
+  string from_agent = 2;
+  string to_agent = 3;
+  string capability = 4;
+  bytes payload = 5;  // JSON payload
+  TaskStatus status = 6;
+  bytes result = 7;   // JSON result
+  string error = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+  google.protobuf.Timestamp completed_at = 11;
+}

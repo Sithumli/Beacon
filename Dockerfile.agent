@@ -1,0 +1,28 @@
+# Build stage
+FROM golang:1.22-alpine AS builder
+
+ARG AGENT_PATH=./examples/echo-agent
+
+WORKDIR /app
+
+# Copy go mod files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source
+COPY . .
+
+# Build agent
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/agent ${AGENT_PATH}
+
+# Runtime stage
+FROM alpine:3.19
+
+WORKDIR /app
+
+RUN apk add --no-cache ca-certificates tzdata
+
+COPY --from=builder /bin/agent /bin/agent
+
+ENTRYPOINT ["/bin/agent"]
+CMD ["--server", "${A2A_SERVER}", "--host", "${AGENT_HOST}", "--port", "${AGENT_PORT}"]
