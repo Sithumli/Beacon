@@ -44,6 +44,11 @@ func (m *MemoryStore) CreateAgent(ctx context.Context, agent *core.Agent) error 
 	agentCopy := *agent
 	agentCopy.Capabilities = make([]core.Capability, len(agent.Capabilities))
 	copy(agentCopy.Capabilities, agent.Capabilities)
+	// Deep copy Metadata.Tags
+	if len(agent.Metadata.Tags) > 0 {
+		agentCopy.Metadata.Tags = make([]string, len(agent.Metadata.Tags))
+		copy(agentCopy.Metadata.Tags, agent.Metadata.Tags)
+	}
 	m.agents[agent.ID] = &agentCopy
 
 	return nil
@@ -63,6 +68,11 @@ func (m *MemoryStore) GetAgent(ctx context.Context, id string) (*core.Agent, err
 	agentCopy := *agent
 	agentCopy.Capabilities = make([]core.Capability, len(agent.Capabilities))
 	copy(agentCopy.Capabilities, agent.Capabilities)
+	// Deep copy Metadata.Tags
+	if len(agent.Metadata.Tags) > 0 {
+		agentCopy.Metadata.Tags = make([]string, len(agent.Metadata.Tags))
+		copy(agentCopy.Metadata.Tags, agent.Metadata.Tags)
+	}
 	return &agentCopy, nil
 }
 
@@ -82,6 +92,11 @@ func (m *MemoryStore) UpdateAgent(ctx context.Context, agent *core.Agent) error 
 	agentCopy := *agent
 	agentCopy.Capabilities = make([]core.Capability, len(agent.Capabilities))
 	copy(agentCopy.Capabilities, agent.Capabilities)
+	// Deep copy Metadata.Tags
+	if len(agent.Metadata.Tags) > 0 {
+		agentCopy.Metadata.Tags = make([]string, len(agent.Metadata.Tags))
+		copy(agentCopy.Metadata.Tags, agent.Metadata.Tags)
+	}
 	m.agents[agent.ID] = &agentCopy
 
 	return nil
@@ -111,6 +126,11 @@ func (m *MemoryStore) ListAgents(ctx context.Context, filter *AgentFilter) ([]*c
 			agentCopy := *agent
 			agentCopy.Capabilities = make([]core.Capability, len(agent.Capabilities))
 			copy(agentCopy.Capabilities, agent.Capabilities)
+			// Deep copy Metadata.Tags
+			if len(agent.Metadata.Tags) > 0 {
+				agentCopy.Metadata.Tags = make([]string, len(agent.Metadata.Tags))
+				copy(agentCopy.Metadata.Tags, agent.Metadata.Tags)
+			}
 			result = append(result, &agentCopy)
 		}
 	}

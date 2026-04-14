@@ -840,7 +840,7 @@ const file_api_proto_registry_proto_rawDesc = "" +
 	"ListAgents\x12\x16.a2a.ListAgentsRequest\x1a\x17.a2a.ListAgentsResponse\x127\n" +
 	"\bDiscover\x12\x14.a2a.DiscoverRequest\x1a\x15.a2a.DiscoverResponse\x12:\n" +
 	"\tHeartbeat\x12\x15.a2a.HeartbeatRequest\x1a\x16.a2a.HeartbeatResponse\x120\n" +
-	"\x05Watch\x12\x11.a2a.WatchRequest\x1a\x12.a2a.WatchResponse0\x01B-Z+github.com/Sithumli/Beacon/api/proto;protob\x06proto3"
+	"\x05Watch\x12\x11.a2a.WatchRequest\x1a\x12.a2a.WatchResponse0\x01B,Z*github.com/Sithumli/Beacon/api/proto;protob\x06proto3"
 
 var (
 	file_api_proto_registry_proto_rawDescOnce sync.Once

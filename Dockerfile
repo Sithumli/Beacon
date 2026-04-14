@@ -22,8 +22,8 @@ FROM alpine:3.19
 
 WORKDIR /app
 
-# Install runtime dependencies
-RUN apk add --no-cache ca-certificates tzdata
+# Install runtime dependencies (wget for healthcheck)
+RUN apk add --no-cache ca-certificates tzdata wget
 
 # Copy binaries from builder
 COPY --from=builder /bin/a2a-server /bin/a2a-server

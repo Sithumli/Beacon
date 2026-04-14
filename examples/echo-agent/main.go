@@ -24,7 +24,7 @@ type EchoResponse struct {
 }
 
 func main() {
-	serverAddr := flag.String("server", "localhost:50051", "A2A server address")
+	serverAddr := flag.String("server", "localhost:8080", "A2A server address")
 	host := flag.String("host", "localhost", "Agent host")
 	port := flag.Int("port", 50052, "Agent port")
 	flag.Parse()

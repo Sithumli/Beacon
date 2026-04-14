@@ -351,8 +351,39 @@ func (a *Agent) processPendingTasks(ctx context.Context) {
 	}
 
 	// Get pending tasks for this agent
-	// Note: In a production system, you'd want a dedicated endpoint for this
-	// For now, we rely on the server pushing tasks or the task being fetched individually
+	tasks, err := a.client.GetPendingTasks(ctx, a.registered.ID)
+	if err != nil {
+		return // Silently ignore errors during polling
+	}
+
+	for _, task := range tasks {
+		// Mark task as running
+		_, err := a.client.UpdateTask(ctx, task.ID, TaskRunning, nil, "")
+		if err != nil {
+			continue
+		}
+
+		// Find and execute the handler
+		handler, ok := a.handlers[task.Capability]
+		if !ok {
+			a.client.UpdateTask(ctx, task.ID, TaskFailed, nil, "unknown capability: "+task.Capability)
+			continue
+		}
+
+		// Execute the handler
+		result, err := handler(ctx, task.Payload)
+		if err != nil {
+			a.client.UpdateTask(ctx, task.ID, TaskFailed, nil, err.Error())
+			continue
+		}
+
+		// Mark as completed with result
+		var resultInterface interface{}
+		if len(result) > 0 {
+			json.Unmarshal(result, &resultInterface)
+		}
+		a.client.UpdateTask(ctx, task.ID, TaskCompleted, resultInterface, "")
+	}
 }
 
 func (a *Agent) cleanup() error {

@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -42,7 +43,7 @@ func (e *Endpoint) Validate() error {
 
 // Address returns the full address string
 func (e *Endpoint) Address() string {
-	return e.Host + ":" + string(rune(e.Port))
+	return e.Host + ":" + strconv.Itoa(e.Port)
 }
 
 // Metadata contains optional agent metadata

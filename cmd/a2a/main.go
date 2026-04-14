@@ -48,7 +48,7 @@ Use this tool to:
 		},
 	}
 
-	rootCmd.PersistentFlags().StringVarP(&serverAddr, "server", "s", "localhost:50051", "A2A server address")
+	rootCmd.PersistentFlags().StringVarP(&serverAddr, "server", "s", "localhost:8080", "A2A server address")
 
 	// Add subcommands
 	rootCmd.AddCommand(agentsCmd())

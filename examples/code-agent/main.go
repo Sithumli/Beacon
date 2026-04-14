@@ -50,7 +50,7 @@ var (
 )
 
 func main() {
-	serverAddr := flag.String("server", "localhost:50051", "A2A server address")
+	serverAddr := flag.String("server", "localhost:8080", "A2A server address")
 	host := flag.String("host", "localhost", "Agent host")
 	port := flag.Int("port", 50053, "Agent port")
 	flag.StringVar(&ollamaURL, "ollama-url", "http://localhost:11434", "Ollama API URL")

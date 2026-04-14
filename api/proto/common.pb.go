@@ -698,7 +698,7 @@ const file_api_proto_common_proto_rawDesc = "" +
 	"\x13TASK_STATUS_RUNNING\x10\x02\x12\x19\n" +
 	"\x15TASK_STATUS_COMPLETED\x10\x03\x12\x16\n" +
 	"\x12TASK_STATUS_FAILED\x10\x04\x12\x19\n" +
-	"\x15TASK_STATUS_CANCELLED\x10\x05B-Z+github.com/Sithumli/Beacon/api/proto;protob\x06proto3"
+	"\x15TASK_STATUS_CANCELLED\x10\x05B,Z*github.com/Sithumli/Beacon/api/proto;protob\x06proto3"
 
 var (
 	file_api_proto_common_proto_rawDescOnce sync.Once

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -40,6 +41,8 @@ const (
 	BgBlack = "\033[40m"
 )
 
+var corsOrigins string
+
 func main() {
 	// Parse flags
 	httpPort := flag.Int("port", 8080, "HTTP server port")
@@ -48,6 +51,7 @@ func main() {
 	inMemory := flag.Bool("memory", false, "Use in-memory storage")
 	debug := flag.Bool("debug", false, "Enable debug logging")
 	enableGRPC := flag.Bool("grpc", true, "Enable gRPC server")
+	flag.StringVar(&corsOrigins, "cors-origins", "", "Allowed CORS origins (comma-separated, empty for '*' in dev)")
 	flag.Parse()
 
 	// Configure logging - suppress during startup
@@ -264,7 +268,26 @@ func printServerInfo(httpPort, grpcPort int, grpcEnabled bool, storage string) {
 
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := "*"
+		if corsOrigins != "" {
+			// Check if the request origin is in the allowed list
+			requestOrigin := r.Header.Get("Origin")
+			allowed := false
+			for _, o := range strings.Split(corsOrigins, ",") {
+				if strings.TrimSpace(o) == requestOrigin {
+					allowed = true
+					origin = requestOrigin
+					break
+				}
+			}
+			if !allowed && requestOrigin != "" {
+				// Origin not allowed, don't set CORS headers
+				next.ServeHTTP(w, r)
+				return
+			}
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", origin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 

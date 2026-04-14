@@ -167,6 +167,20 @@ func (c *Client) GetTask(ctx context.Context, taskID string) (*TaskInfo, error) 
 	return responseToTaskInfo(&task), nil
 }
 
+// GetPendingTasks retrieves pending tasks for an agent
+func (c *Client) GetPendingTasks(ctx context.Context, agentID string) ([]*TaskInfo, error) {
+	var tasks []*taskResponse
+	if err := c.get(ctx, "/api/v1/pending?agent_id="+agentID, &tasks); err != nil {
+		return nil, err
+	}
+
+	result := make([]*TaskInfo, len(tasks))
+	for i, t := range tasks {
+		result[i] = responseToTaskInfo(t)
+	}
+	return result, nil
+}
+
 // UpdateTask updates a task's status
 func (c *Client) UpdateTask(ctx context.Context, taskID string, status TaskStatus, result interface{}, errMsg string) (*TaskInfo, error) {
 	req := updateTaskRequest{

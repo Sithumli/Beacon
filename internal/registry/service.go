@@ -3,8 +3,8 @@ package registry
 import (
 	"context"
 	"errors"
+	"strconv"
 	"sync"
-	"time"
 
 	"github.com/Sithumli/Beacon/internal/core"
 	"github.com/Sithumli/Beacon/internal/store"
@@ -152,13 +152,20 @@ func (s *Service) Heartbeat(ctx context.Context, agentID string) error {
 	return nil
 }
 
+// watcher holds a channel and optional capability filter
+type watcher struct {
+	ch           chan WatchEvent
+	capabilities []string
+}
+
 // Watch registers a channel to receive registry events
+// If capabilities is non-empty, only events for agents with matching capabilities will be sent
 func (s *Service) Watch(capabilities []string) (string, <-chan WatchEvent) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	s.watcherCount++
-	id := time.Now().Format("20060102150405") + "-" + string(rune(s.watcherCount))
+	id := "watcher-" + strconv.Itoa(s.watcherCount)
 	ch := make(chan WatchEvent, 100)
 	s.watchers[id] = ch
 

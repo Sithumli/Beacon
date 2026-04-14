@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/Sithumli/Beacon/internal/core"
@@ -106,7 +107,12 @@ func (s *SQLiteStore) CreateAgent(ctx context.Context, agent *core.Agent) error 
 		agent.RegisteredAt, agent.LastHeartbeat)
 
 	if err != nil {
-		return ErrAlreadyExists
+		// Check for uniqueness/constraint violation (SQLITE_CONSTRAINT = 19)
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") ||
+			strings.Contains(err.Error(), "PRIMARY KEY constraint failed") {
+			return ErrAlreadyExists
+		}
+		return fmt.Errorf("failed to create agent: %w", err)
 	}
 	return nil
 }
@@ -201,6 +207,11 @@ func (s *SQLiteStore) ListAgents(ctx context.Context, filter *AgentFilter) ([]*c
 			query += " AND status = ?"
 			args = append(args, string(*filter.Status))
 		}
+		// Filter by tags using JSON extraction
+		for _, tag := range filter.Tags {
+			query += " AND metadata LIKE ?"
+			args = append(args, "%"+tag+"%")
+		}
 	}
 
 	rows, err := s.db.QueryContext(ctx, query, args...)
@@ -262,7 +273,12 @@ func (s *SQLiteStore) CreateTask(ctx context.Context, task *core.Task) error {
 		task.CreatedAt, task.UpdatedAt, nullableTime(task.CompletedAt))
 
 	if err != nil {
-		return ErrAlreadyExists
+		// Check for uniqueness/constraint violation
+		if strings.Contains(err.Error(), "UNIQUE constraint failed") ||
+			strings.Contains(err.Error(), "PRIMARY KEY constraint failed") {
+			return ErrAlreadyExists
+		}
+		return fmt.Errorf("failed to create task: %w", err)
 	}
 	return nil
 }
@@ -365,6 +381,15 @@ func (s *SQLiteStore) ListTasks(ctx context.Context, filter *TaskFilter) ([]*cor
 	}
 
 	query += " ORDER BY created_at DESC"
+
+	if filter != nil {
+		if filter.Limit != nil && *filter.Limit > 0 {
+			query += fmt.Sprintf(" LIMIT %d", *filter.Limit)
+		}
+		if filter.Offset != nil && *filter.Offset > 0 {
+			query += fmt.Sprintf(" OFFSET %d", *filter.Offset)
+		}
+	}
 
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {

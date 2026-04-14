@@ -916,7 +916,7 @@ const file_api_proto_broker_proto_rawDesc = "" +
 	"\n" +
 	"CancelTask\x12\x16.a2a.CancelTaskRequest\x1a\x17.a2a.CancelTaskResponse\x124\n" +
 	"\tSubscribe\x12\x15.a2a.SubscribeRequest\x1a\x0e.a2a.TaskEvent0\x01\x12:\n" +
-	"\tRouteTask\x12\x15.a2a.RouteTaskRequest\x1a\x16.a2a.RouteTaskResponseB-Z+github.com/Sithumli/Beacon/api/proto;protob\x06proto3"
+	"\tRouteTask\x12\x15.a2a.RouteTaskRequest\x1a\x16.a2a.RouteTaskResponseB,Z*github.com/Sithumli/Beacon/api/proto;protob\x06proto3"
 
 var (
 	file_api_proto_broker_proto_rawDescOnce sync.Once

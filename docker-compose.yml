@@ -31,7 +31,7 @@ services:
       a2a-server:
         condition: service_healthy
     environment:
-      - A2A_SERVER=a2a-server:50051
+      - A2A_SERVER=a2a-server:8080
       - AGENT_HOST=echo-agent
       - AGENT_PORT=50052
     expose:

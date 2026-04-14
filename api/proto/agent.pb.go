@@ -241,7 +241,7 @@ const file_api_proto_agent_proto_rawDesc = "" +
 	"\ahealthy\x18\x01 \x01(\bR\ahealthy2}\n" +
 	"\fAgentService\x12@\n" +
 	"\vExecuteTask\x12\x17.a2a.ExecuteTaskRequest\x1a\x18.a2a.ExecuteTaskResponse\x12+\n" +
-	"\x04Ping\x12\x10.a2a.PingRequest\x1a\x11.a2a.PingResponseB-Z+github.com/Sithumli/Beacon/api/proto;protob\x06proto3"
+	"\x04Ping\x12\x10.a2a.PingRequest\x1a\x11.a2a.PingResponseB,Z*github.com/Sithumli/Beacon/api/proto;protob\x06proto3"
 
 var (
 	file_api_proto_agent_proto_rawDescOnce sync.Once

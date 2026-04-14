@@ -369,14 +369,27 @@ func (h *Handler) handleSSE(w http.ResponseWriter, r *http.Request) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			agents, _ := h.registry.ListAgents(context.Background(), nil)
-			tasks, _ := h.broker.ListTasks(context.Background(), nil)
+			// Use request context with timeout for store queries
+			queryCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+			agents, err := h.registry.ListAgents(queryCtx, nil)
+			if err != nil {
+				cancel()
+				continue
+			}
+			tasks, err := h.broker.ListTasks(queryCtx, nil)
+			cancel()
+			if err != nil {
+				continue
+			}
 
 			data := map[string]interface{}{
 				"agents": len(agents),
 				"tasks":  len(tasks),
 			}
-			jsonData, _ := json.Marshal(data)
+			jsonData, err := json.Marshal(data)
+			if err != nil {
+				continue
+			}
 
 			w.Write([]byte("data: "))
 			w.Write(jsonData)

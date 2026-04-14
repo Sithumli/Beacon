@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"sync"
-	"time"
 
 	"github.com/Sithumli/Beacon/internal/core"
 	"github.com/Sithumli/Beacon/internal/registry"
@@ -180,7 +180,7 @@ func (s *Service) Subscribe(agentID string) (string, <-chan TaskEvent) {
 	defer s.mu.Unlock()
 
 	s.subCount++
-	id := agentID + "-" + time.Now().Format("20060102150405") + "-" + string(rune(s.subCount))
+	id := agentID + "-sub-" + strconv.Itoa(s.subCount)
 	ch := make(chan TaskEvent, 100)
 	s.subscribers[id] = ch
 

@@ -43,7 +43,7 @@ A complete Agent-to-Agent (A2A) Discovery Platform built in Go. Agents can regis
 ```bash
 # Clone the repository
 git clone https://github.com/Sithumli/Beacon.git
-cd a2a-platform
+cd Beacon
 
 # Download dependencies
 go mod download

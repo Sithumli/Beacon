@@ -23,6 +23,7 @@ func (h *HTTPHandler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/v1/tasks", h.handleTasks)
 	mux.HandleFunc("/api/v1/tasks/", h.handleTask)
 	mux.HandleFunc("/api/v1/route", h.handleRoute)
+	mux.HandleFunc("/api/v1/pending", h.handlePendingTasks)
 }
 
 func (h *HTTPHandler) handleTasks(w http.ResponseWriter, r *http.Request) {
@@ -127,6 +128,32 @@ func (h *HTTPHandler) handleTask(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+}
+
+func (h *HTTPHandler) handlePendingTasks(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	agentID := r.URL.Query().Get("agent_id")
+	if agentID == "" {
+		jsonError(w, "agent_id query parameter required", http.StatusBadRequest)
+		return
+	}
+
+	ctx := r.Context()
+	tasks, err := h.service.GetPendingTasks(ctx, agentID)
+	if err != nil {
+		jsonError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	responses := make([]*TaskResponse, len(tasks))
+	for i, task := range tasks {
+		responses[i] = taskToResponse(task)
+	}
+	jsonResponse(w, responses)
 }
 
 func (h *HTTPHandler) handleRoute(w http.ResponseWriter, r *http.Request) {
