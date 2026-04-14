@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package a2a;
+
+option go_package = "github.com/Sithumli/Beacon/api/proto;proto";
+
+import "api/proto/common.proto";
+
+// BrokerService handles task routing between agents
+service BrokerService {
+  // Send a task to an agent
+  rpc SendTask(SendTaskRequest) returns (SendTaskResponse);
+
+  // Get task by ID
+  rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
+
+  // Update task status/result
+  rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse);
+
+  // List tasks with filters
+  rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+
+  // Cancel a pending or running task
+  rpc CancelTask(CancelTaskRequest) returns (CancelTaskResponse);
+
+  // Subscribe to tasks for an agent (streaming)
+  rpc Subscribe(SubscribeRequest) returns (stream TaskEvent);
+
+  // Route a task to any agent with a capability
+  rpc RouteTask(RouteTaskRequest) returns (RouteTaskResponse);
+}
+
+message SendTaskRequest {
+  string from_agent = 1;
+  string to_agent = 2;
+  string capability = 3;
+  bytes payload = 4;  // JSON payload
+}
+
+message SendTaskResponse {
+  string task_id = 1;
+  Task task = 2;
+}
+
+message GetTaskRequest {
+  string task_id = 1;
+}
+
+message GetTaskResponse {
+  Task task = 1;
+}
+
+message UpdateTaskRequest {
+  string task_id = 1;
+  TaskStatus status = 2;
+  bytes result = 3;   // JSON result (for completed)
+  string error = 4;   // Error message (for failed)
+}
+
+message UpdateTaskResponse {
+  Task task = 1;
+}
+
+message ListTasksRequest {
+  TaskStatus status = 1;
+  string from_agent = 2;
+  string to_agent = 3;
+  string capability = 4;
+  int32 limit = 5;
+  int32 offset = 6;
+}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+  int32 total = 2;
+}
+
+message CancelTaskRequest {
+  string task_id = 1;
+}
+
+message CancelTaskResponse {
+  bool success = 1;
+  Task task = 2;
+}
+
+message SubscribeRequest {
+  string agent_id = 1;
+}
+
+message TaskEvent {
+  enum EventType {
+    EVENT_TYPE_UNSPECIFIED = 0;
+    EVENT_TYPE_NEW_TASK = 1;
+    EVENT_TYPE_TASK_UPDATED = 2;
+    EVENT_TYPE_TASK_CANCELLED = 3;
+  }
+  EventType event = 1;
+  Task task = 2;
+}
+
+message RouteTaskRequest {
+  string from_agent = 1;
+  string capability = 2;
+  bytes payload = 3;
+}
+
+message RouteTaskResponse {
+  string task_id = 1;
+  string to_agent = 2;
+  Task task = 3;
+}

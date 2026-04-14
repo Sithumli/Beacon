@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package a2a;
+
+option go_package = "github.com/Sithumli/Beacon/api/proto;proto";
+
+// AgentService is implemented by agents to receive direct task execution
+service AgentService {
+  // ExecuteTask executes a task directly on the agent
+  rpc ExecuteTask(ExecuteTaskRequest) returns (ExecuteTaskResponse);
+
+  // Ping checks if the agent is alive
+  rpc Ping(PingRequest) returns (PingResponse);
+}
+
+message ExecuteTaskRequest {
+  string task_id = 1;
+  string capability = 2;
+  bytes payload = 3;
+}
+
+message ExecuteTaskResponse {
+  bool success = 1;
+  bytes result = 2;
+  string error = 3;
+}
+
+message PingRequest {}
+
+message PingResponse {
+  bool healthy = 1;
+}
