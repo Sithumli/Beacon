@@ -15,7 +15,7 @@ import (
 type Service struct {
 	store        store.Store
 	mu           sync.RWMutex
-	watchers     map[string]chan WatchEvent
+	watchers     map[string]*watcher
 	watcherCount int
 }
 
@@ -39,7 +39,7 @@ const (
 func NewService(s store.Store) *Service {
 	return &Service{
 		store:    s,
-		watchers: make(map[string]chan WatchEvent),
+		watchers: make(map[string]*watcher),
 	}
 }
 
@@ -167,7 +167,10 @@ func (s *Service) Watch(capabilities []string) (string, <-chan WatchEvent) {
 	s.watcherCount++
 	id := "watcher-" + strconv.Itoa(s.watcherCount)
 	ch := make(chan WatchEvent, 100)
-	s.watchers[id] = ch
+	s.watchers[id] = &watcher{
+		ch:           ch,
+		capabilities: capabilities,
+	}
 
 	return id, ch
 }
@@ -177,8 +180,8 @@ func (s *Service) Unwatch(id string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if ch, ok := s.watchers[id]; ok {
-		close(ch)
+	if w, ok := s.watchers[id]; ok {
+		close(w.ch)
 		delete(s.watchers, id)
 	}
 }
@@ -187,9 +190,23 @@ func (s *Service) notifyWatchers(event WatchEvent) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	for _, ch := range s.watchers {
+	for _, w := range s.watchers {
+		// If capabilities filter is set, only send events for agents with matching capabilities
+		if len(w.capabilities) > 0 && event.Agent != nil {
+			match := false
+			for _, cap := range w.capabilities {
+				if event.Agent.HasCapability(cap) {
+					match = true
+					break
+				}
+			}
+			if !match {
+				continue
+			}
+		}
+
 		select {
-		case ch <- event:
+		case w.ch <- event:
 		default:
 			// Channel full, skip
 		}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -20,7 +21,7 @@ type Client struct {
 func NewClient(serverAddr string) (*Client, error) {
 	// Ensure the address has a scheme
 	baseURL := serverAddr
-	if len(baseURL) > 0 && baseURL[0] != 'h' {
+	if !strings.Contains(baseURL, "://") {
 		baseURL = "http://" + baseURL
 	}
 

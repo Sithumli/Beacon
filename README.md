@@ -35,7 +35,7 @@ A complete Agent-to-Agent (A2A) Discovery Platform built in Go. Agents can regis
 
 ### Prerequisites
 
-- Go 1.22+
+- Go 1.25+
 - Make (optional)
 
 ### Installation

@@ -79,6 +79,9 @@ func (s *GRPCServer) ListTasks(ctx context.Context, req *pb.ListTasksRequest) (*
 		offset := int(req.Offset)
 		filter.Offset = &offset
 	}
+	if req.Capability != "" {
+		filter.Capability = &req.Capability
+	}
 
 	tasks, err := s.service.ListTasks(ctx, filter)
 	if err != nil {

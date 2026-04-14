@@ -188,6 +188,15 @@ func (m *MemoryStore) CreateTask(ctx context.Context, task *core.Task) error {
 	}
 
 	taskCopy := *task
+	// Deep copy Payload and Result since they are []byte slices
+	if len(task.Payload) > 0 {
+		taskCopy.Payload = make([]byte, len(task.Payload))
+		copy(taskCopy.Payload, task.Payload)
+	}
+	if len(task.Result) > 0 {
+		taskCopy.Result = make([]byte, len(task.Result))
+		copy(taskCopy.Result, task.Result)
+	}
 	m.tasks[task.ID] = &taskCopy
 
 	return nil
@@ -204,6 +213,15 @@ func (m *MemoryStore) GetTask(ctx context.Context, id string) (*core.Task, error
 	}
 
 	taskCopy := *task
+	// Deep copy Payload and Result
+	if len(task.Payload) > 0 {
+		taskCopy.Payload = make([]byte, len(task.Payload))
+		copy(taskCopy.Payload, task.Payload)
+	}
+	if len(task.Result) > 0 {
+		taskCopy.Result = make([]byte, len(task.Result))
+		copy(taskCopy.Result, task.Result)
+	}
 	return &taskCopy, nil
 }
 
@@ -221,6 +239,15 @@ func (m *MemoryStore) UpdateTask(ctx context.Context, task *core.Task) error {
 	}
 
 	taskCopy := *task
+	// Deep copy Payload and Result
+	if len(task.Payload) > 0 {
+		taskCopy.Payload = make([]byte, len(task.Payload))
+		copy(taskCopy.Payload, task.Payload)
+	}
+	if len(task.Result) > 0 {
+		taskCopy.Result = make([]byte, len(task.Result))
+		copy(taskCopy.Result, task.Result)
+	}
 	m.tasks[task.ID] = &taskCopy
 
 	return nil
@@ -248,9 +275,32 @@ func (m *MemoryStore) ListTasks(ctx context.Context, filter *TaskFilter) ([]*cor
 	for _, task := range m.tasks {
 		if m.matchesTaskFilter(task, filter) {
 			taskCopy := *task
+			// Deep copy Payload and Result
+			if len(task.Payload) > 0 {
+				taskCopy.Payload = make([]byte, len(task.Payload))
+				copy(taskCopy.Payload, task.Payload)
+			}
+			if len(task.Result) > 0 {
+				taskCopy.Result = make([]byte, len(task.Result))
+				copy(taskCopy.Result, task.Result)
+			}
 			result = append(result, &taskCopy)
 		}
 	}
+
+	// Apply offset and limit
+	if filter != nil {
+		if filter.Offset != nil && *filter.Offset > 0 {
+			if *filter.Offset >= len(result) {
+				return []*core.Task{}, nil
+			}
+			result = result[*filter.Offset:]
+		}
+		if filter.Limit != nil && *filter.Limit > 0 && *filter.Limit < len(result) {
+			result = result[:*filter.Limit]
+		}
+	}
+
 	return result, nil
 }
 

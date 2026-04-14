@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 // AgentStatus represents agent health status
@@ -89,6 +91,7 @@ type Agent struct {
 	mu           sync.Mutex
 	running      bool
 	stopCh       chan struct{}
+	stopOnce     sync.Once
 	heartbeatTTL time.Duration
 }
 
@@ -173,6 +176,7 @@ func (b *AgentBuilder) Build() *Agent {
 		config:       b.config,
 		handlers:     b.handlers,
 		stopCh:       make(chan struct{}),
+		stopOnce:     sync.Once{},
 		heartbeatTTL: 10 * time.Second,
 	}
 }
@@ -234,13 +238,15 @@ func (a *Agent) Start(ctx context.Context) error {
 // Stop stops the agent gracefully
 func (a *Agent) Stop() {
 	a.mu.Lock()
-	defer a.mu.Unlock()
-
 	if !a.running {
+		a.mu.Unlock()
 		return
 	}
+	a.mu.Unlock()
 
-	close(a.stopCh)
+	a.stopOnce.Do(func() {
+		close(a.stopCh)
+	})
 }
 
 func (a *Agent) startHTTPServer() error {
@@ -256,7 +262,7 @@ func (a *Agent) startHTTPServer() error {
 
 	go func() {
 		if err := a.httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			// Log error but don't crash
+			log.Error().Err(err).Str("addr", addr).Msg("HTTP server failed to start")
 		}
 	}()
 

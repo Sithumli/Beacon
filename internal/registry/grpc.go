@@ -3,8 +3,9 @@ package registry
 import (
 	"context"
 
-	"github.com/Sithumli/Beacon/internal/core"
 	pb "github.com/Sithumli/Beacon/api/proto"
+	"github.com/Sithumli/Beacon/internal/core"
+	"github.com/Sithumli/Beacon/internal/store"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -77,7 +78,20 @@ func (s *GRPCServer) GetAgent(ctx context.Context, req *pb.GetAgentRequest) (*pb
 
 // ListAgents lists all agents
 func (s *GRPCServer) ListAgents(ctx context.Context, req *pb.ListAgentsRequest) (*pb.ListAgentsResponse, error) {
-	agents, err := s.service.ListAgents(ctx, nil)
+	// Build filter from request
+	filter := &store.AgentFilter{}
+	if req.Status != pb.AgentStatus_AGENT_STATUS_UNSPECIFIED {
+		status := protoToAgentStatus(req.Status)
+		filter.Status = &status
+	}
+	if req.Capability != "" {
+		filter.Capability = &req.Capability
+	}
+	if len(req.Tags) > 0 {
+		filter.Tags = req.Tags
+	}
+
+	agents, err := s.service.ListAgents(ctx, filter)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to list agents: %v", err)
 	}
@@ -182,6 +196,17 @@ func statusToProto(s core.AgentStatus) pb.AgentStatus {
 		return pb.AgentStatus_AGENT_STATUS_UNHEALTHY
 	default:
 		return pb.AgentStatus_AGENT_STATUS_UNKNOWN
+	}
+}
+
+func protoToAgentStatus(s pb.AgentStatus) core.AgentStatus {
+	switch s {
+	case pb.AgentStatus_AGENT_STATUS_HEALTHY:
+		return core.StatusHealthy
+	case pb.AgentStatus_AGENT_STATUS_UNHEALTHY:
+		return core.StatusUnhealthy
+	default:
+		return core.StatusUnknown
 	}
 }
 
