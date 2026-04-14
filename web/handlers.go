@@ -61,8 +61,16 @@ func (h *Handler) handleDashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	agents, _ := h.registry.ListAgents(ctx, nil)
-	tasks, _ := h.broker.ListTasks(ctx, nil)
+	agents, err := h.registry.ListAgents(ctx, nil)
+	if err != nil {
+		http.Error(w, "Failed to load agents", http.StatusInternalServerError)
+		return
+	}
+	tasks, err := h.broker.ListTasks(ctx, nil)
+	if err != nil {
+		http.Error(w, "Failed to load tasks", http.StatusInternalServerError)
+		return
+	}
 
 	// Calculate stats
 	activeCount := 0
@@ -142,7 +150,10 @@ func (h *Handler) handleAgentDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filter := &store.TaskFilter{ToAgent: &agentID}
-	tasks, _ := h.broker.ListTasks(ctx, filter)
+	tasks, err := h.broker.ListTasks(ctx, filter)
+	if err != nil {
+		tasks = []*core.Task{} // Show empty list on error
+	}
 
 	data := map[string]interface{}{
 		"Page":   "agents",
@@ -283,8 +294,16 @@ func (h *Handler) handleAPITasks(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) handleAPIStats(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	agents, _ := h.registry.ListAgents(ctx, nil)
-	tasks, _ := h.broker.ListTasks(ctx, nil)
+	agents, err := h.registry.ListAgents(ctx, nil)
+	if err != nil {
+		jsonError(w, "failed to list agents: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	tasks, err := h.broker.ListTasks(ctx, nil)
+	if err != nil {
+		jsonError(w, "failed to list tasks: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	healthyCount := 0
 	for _, a := range agents {

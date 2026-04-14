@@ -3,8 +3,8 @@ FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-# Install build dependencies
-RUN apk add --no-cache git gcc musl-dev
+# Install build dependencies (git only - modernc.org/sqlite is pure Go)
+RUN apk add --no-cache git
 
 # Copy go mod files
 COPY go.mod go.sum ./
@@ -13,8 +13,8 @@ RUN go mod download
 # Copy source
 COPY . .
 
-# Build binaries
-RUN CGO_ENABLED=1 GOOS=linux go build -o /bin/a2a-server ./cmd/server
+# Build binaries (CGO_ENABLED=0 since modernc.org/sqlite is pure Go)
+RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/a2a-server ./cmd/server
 RUN CGO_ENABLED=0 GOOS=linux go build -o /bin/a2a ./cmd/a2a
 
 # Runtime stage

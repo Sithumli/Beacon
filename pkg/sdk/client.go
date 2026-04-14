@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -92,7 +93,7 @@ func (c *Client) Heartbeat(ctx context.Context, agentID string) error {
 // DiscoverAgents finds agents with a specific capability
 func (c *Client) DiscoverAgents(ctx context.Context, capability string) ([]*AgentInfo, error) {
 	var agents []*agentResponse
-	if err := c.get(ctx, "/api/v1/discover?capability="+capability, &agents); err != nil {
+	if err := c.get(ctx, "/api/v1/discover?capability="+url.QueryEscape(capability), &agents); err != nil {
 		return nil, err
 	}
 
@@ -171,7 +172,7 @@ func (c *Client) GetTask(ctx context.Context, taskID string) (*TaskInfo, error) 
 // GetPendingTasks retrieves pending tasks for an agent
 func (c *Client) GetPendingTasks(ctx context.Context, agentID string) ([]*TaskInfo, error) {
 	var tasks []*taskResponse
-	if err := c.get(ctx, "/api/v1/pending?agent_id="+agentID, &tasks); err != nil {
+	if err := c.get(ctx, "/api/v1/pending?agent_id="+url.QueryEscape(agentID), &tasks); err != nil {
 		return nil, err
 	}
 

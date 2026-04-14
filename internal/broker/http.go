@@ -115,7 +115,12 @@ func (h *HTTPHandler) handleTask(w http.ResponseWriter, r *http.Request) {
 
 		var result json.RawMessage
 		if req.Result != nil {
-			result, _ = json.Marshal(req.Result)
+			marshaledResult, err := json.Marshal(req.Result)
+			if err != nil {
+				jsonError(w, "invalid result payload", http.StatusBadRequest)
+				return
+			}
+			result = marshaledResult
 		}
 
 		task, err := h.service.UpdateTask(ctx, taskID, core.TaskStatus(req.Status), result, req.Error)

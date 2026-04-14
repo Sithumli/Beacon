@@ -270,8 +270,14 @@ func (a *Agent) startHTTPServer() error {
 }
 
 func (a *Agent) handleExecute(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "method not allowed",
+		})
 		return
 	}
 
@@ -282,7 +288,11 @@ func (a *Agent) handleExecute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"success": false,
+			"error":   "invalid request",
+		})
 		return
 	}
 
@@ -298,7 +308,7 @@ func (a *Agent) handleExecute(w http.ResponseWriter, r *http.Request) {
 
 	result, err := handler(r.Context(), req.Payload)
 	if err != nil {
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"error":   err.Error(),
@@ -314,6 +324,7 @@ func (a *Agent) handleExecute(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Agent) handleHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]bool{"healthy": true})
 }
 

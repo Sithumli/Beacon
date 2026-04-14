@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/Sithumli/Beacon/internal/core"
@@ -203,8 +204,10 @@ func (s *Service) notifySubscribers(agentID string, event TaskEvent) {
 	defer s.mu.RUnlock()
 
 	for subID, ch := range s.subscribers {
-		// Match subscriptions for this agent
-		if len(subID) >= len(agentID) && subID[:len(agentID)] == agentID {
+		// Match subscriptions for this agent using exact agent ID prefix with separator
+		// subID format is "agentID-sub-N", so we check for "agentID-sub-" prefix
+		expectedPrefix := agentID + "-sub-"
+		if strings.HasPrefix(subID, expectedPrefix) {
 			select {
 			case ch <- event:
 			default:

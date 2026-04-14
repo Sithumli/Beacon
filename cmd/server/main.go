@@ -268,28 +268,36 @@ func printServerInfo(httpPort, grpcPort int, grpcEnabled bool, storage string) {
 
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		origin := "*"
-		if corsOrigins != "" {
-			// Check if the request origin is in the allowed list
-			requestOrigin := r.Header.Get("Origin")
-			allowed := false
-			for _, o := range strings.Split(corsOrigins, ",") {
-				if strings.TrimSpace(o) == requestOrigin {
-					allowed = true
-					origin = requestOrigin
-					break
-				}
-			}
-			if !allowed && requestOrigin != "" {
-				// Origin not allowed, don't set CORS headers
-				next.ServeHTTP(w, r)
-				return
-			}
+		requestOrigin := r.Header.Get("Origin")
+		if requestOrigin == "" {
+			next.ServeHTTP(w, r)
+			return
 		}
 
-		w.Header().Set("Access-Control-Allow-Origin", origin)
+		// No CORS policy configured: do not allow cross-origin access by default
+		if corsOrigins == "" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		// Check if the request origin is in the allowed list
+		allowed := false
+		for _, o := range strings.Split(corsOrigins, ",") {
+			if strings.TrimSpace(o) == requestOrigin {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			// Origin not allowed, don't set CORS headers
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", requestOrigin)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		w.Header().Set("Vary", "Origin")
 
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
