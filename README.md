@@ -14,22 +14,7 @@ A complete Agent-to-Agent (A2A) Discovery Platform built in Go. Agents can regis
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    A2A Discovery Platform                    │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │  Registry   │  │  Message    │  │   Web Dashboard     │  │
-│  │  Service    │  │  Broker     │  │   (HTTP)            │  │
-│  │  (HTTP)     │  │  (HTTP)     │  │                     │  │
-│  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘  │
-│         └────────────────┼─────────────────────┘             │
-│                    ┌─────┴─────┐                             │
-│                    │   Store   │                             │
-│                    │ (SQLite)  │                             │
-│                    └───────────┘                             │
-└─────────────────────────────────────────────────────────────┘
-```
+![A2A Discovery Platform Architecture](docs/architecture.png)
 
 ## Quick Start
 
