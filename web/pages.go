@@ -92,66 +92,69 @@ const dashboardTemplate = `
                     <h1 class="page-title">Dashboard</h1>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                        <div class="label">TOTAL AGENTS</div>
-                        <div class="value" id="agent-count">{{.TotalAgents}}</div>
+                <div class="dashboard-top">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="9" cy="7" r="4"></circle>
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                            <div class="label">Agents</div>
+                            <div class="value" id="agent-count">{{.TotalAgents}}</div>
+                        </div>
+                        <div class="stat-card success">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                            </svg>
+                            <div class="label">Healthy</div>
+                            <div class="value">{{.ActiveAgents}}</div>
+                        </div>
+                        <div class="stat-card">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 11 12 14 22 4"></polyline>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                            </svg>
+                            <div class="label">Completed</div>
+                            <div class="value" id="task-count">{{.TasksDone}}</div>
+                        </div>
+                        <div class="stat-card warning">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <div class="label">Running</div>
+                            <div class="value">{{.RunningTasks}}</div>
+                        </div>
+                        <div class="stat-card danger">
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                            <div class="label">Failed</div>
+                            <div class="value">{{.FailedTasks}}</div>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                        </svg>
-                        <div class="label">HEALTHY</div>
-                        <div class="value">{{.ActiveAgents}}</div>
-                    </div>
-                    <div class="stat-card">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="9 11 12 14 22 4"></polyline>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                        <div class="label">TASKS COMPLETED</div>
-                        <div class="value" id="task-count">{{.TasksDone}}</div>
-                    </div>
-                    <div class="stat-card">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        <div class="label">RUNNING</div>
-                        <div class="value">{{.RunningTasks}}</div>
-                    </div>
-                    <div class="stat-card">
-                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="15" y1="9" x2="9" y2="15"></line>
-                            <line x1="9" y1="9" x2="15" y2="15"></line>
-                        </svg>
-                        <div class="label">FAILED</div>
-                        <div class="value">{{.FailedTasks}}</div>
-                    </div>
-                </div>
 
-                <div class="charts-section">
-                    <div class="quick-task" style="max-width: 400px;">
-                        <div class="quick-task-title">Quick Task</div>
-                        <div class="quick-task-subtitle">Route a task to capable agents</div>
-
-                        <form id="quick-task-form" action="/api/v1/route" method="POST">
+                    <div class="quick-task">
+                        <div class="quick-task-header">
+                            <div class="quick-task-title">Quick Task</div>
+                        </div>
+                        <form id="quick-task-form" class="quick-task-form" action="/api/v1/route" method="POST">
                             <div class="form-group">
                                 <label class="form-label">CAPABILITY</label>
-                                <input type="text" class="form-input" name="capability" placeholder="e.g. echo, code-generation">
+                                <input type="text" class="form-input" name="capability" placeholder="echo">
                             </div>
                             <div class="form-group">
-                                <label class="form-label">PAYLOAD (JSON)</label>
-                                <input type="text" class="form-input" name="payload" placeholder='{"message": "hello"}'>
+                                <label class="form-label">PAYLOAD</label>
+                                <input type="text" class="form-input" name="payload" placeholder='{"msg": "hi"}'>
                             </div>
-                            <button type="submit" class="btn btn-secondary btn-block">SEND TASK</button>
+                            <div class="form-group btn-group">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-secondary">SEND</button>
+                            </div>
                         </form>
                     </div>
                 </div>
