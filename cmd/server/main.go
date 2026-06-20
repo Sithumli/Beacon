@@ -185,33 +185,24 @@ func printBanner() {
 	fmt.Print("\033[H\033[2J") // Clear screen
 
 	banner := `
-    %s%s╔══════════════════════════════════════════════════════════════╗%s
-    %s%s║%s                                                              %s%s║%s
-    %s%s║%s    %s%s██████╗ ███████╗ █████╗  ██████╗ ██████╗ ███╗   ██╗%s     %s%s║%s
-    %s%s║%s    %s%s██╔══██╗██╔════╝██╔══██╗██╔════╝██╔═══██╗████╗  ██║%s     %s%s║%s
-    %s%s║%s    %s%s██████╔╝█████╗  ███████║██║     ██║   ██║██╔██╗ ██║%s     %s%s║%s
-    %s%s║%s    %s%s██╔══██╗██╔══╝  ██╔══██║██║     ██║   ██║██║╚██╗██║%s     %s%s║%s
-    %s%s║%s    %s%s██████╔╝███████╗██║  ██║╚██████╗╚██████╔╝██║ ╚████║%s     %s%s║%s
-    %s%s║%s    %s%s╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝%s     %s%s║%s
-    %s%s║%s                                                              %s%s║%s
-    %s%s║%s           %sAgent Discovery & Task Routing Platform%s           %s%s║%s
-    %s%s║%s                                                              %s%s║%s
-    %s%s╚══════════════════════════════════════════════════════════════╝%s
+       %s%s██████╗ ███████╗ █████╗  ██████╗ ██████╗ ███╗   ██╗%s
+       %s%s██╔══██╗██╔════╝██╔══██╗██╔════╝██╔═══██╗████╗  ██║%s
+       %s%s██████╔╝█████╗  ███████║██║     ██║   ██║██╔██╗ ██║%s
+       %s%s██╔══██╗██╔══╝  ██╔══██║██║     ██║   ██║██║╚██╗██║%s
+       %s%s██████╔╝███████╗██║  ██║╚██████╗╚██████╔╝██║ ╚████║%s
+       %s%s╚═════╝ ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝%s
+
+       %sAgent Discovery & Task Routing Platform%s
 
 `
 	fmt.Printf(banner,
-		Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Yellow, Bold, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Yellow, Bold, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Yellow, Bold, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Yellow, Bold, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Yellow, Bold, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Yellow, Bold, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Dim, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset, Cyan, Bold, Reset,
-		Cyan, Bold, Reset,
+		Yellow, Bold, Reset,
+		Yellow, Bold, Reset,
+		Yellow, Bold, Reset,
+		Yellow, Bold, Reset,
+		Yellow, Bold, Reset,
+		Yellow, Bold, Reset,
+		Dim, Reset,
 	)
 }
 

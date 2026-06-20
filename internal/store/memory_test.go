@@ -217,3 +217,279 @@ func TestMemoryStoreTaskFilter(t *testing.T) {
 		t.Errorf("expected 1 task to agent-c, got %d", len(tasks))
 	}
 }
+
+func TestMemoryStore_Close(t *testing.T) {
+	store := NewMemoryStore()
+	err := store.Close()
+	if err != nil {
+		t.Errorf("Close() error = %v", err)
+	}
+}
+
+func TestMemoryStore_CreateAgent_Nil(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	err := store.CreateAgent(ctx, nil)
+	if err != ErrInvalidInput {
+		t.Errorf("expected ErrInvalidInput, got %v", err)
+	}
+}
+
+func TestMemoryStore_UpdateAgent_Nil(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	err := store.UpdateAgent(ctx, nil)
+	if err != ErrInvalidInput {
+		t.Errorf("expected ErrInvalidInput, got %v", err)
+	}
+}
+
+func TestMemoryStore_UpdateAgent_NotFound(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	agent := core.NewAgent("Test", "1.0.0", "desc")
+	err := store.UpdateAgent(ctx, agent)
+	if err != ErrNotFound {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestMemoryStore_DeleteAgent_NotFound(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	err := store.DeleteAgent(ctx, "nonexistent")
+	if err != ErrNotFound {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestMemoryStore_GetAgent_NotFound(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	_, err := store.GetAgent(ctx, "nonexistent")
+	if err != ErrNotFound {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestMemoryStore_CreateTask_Nil(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	err := store.CreateTask(ctx, nil)
+	if err != ErrInvalidInput {
+		t.Errorf("expected ErrInvalidInput, got %v", err)
+	}
+}
+
+func TestMemoryStore_CreateTask_Duplicate(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	task := core.NewTask("a", "b", "echo", json.RawMessage(`{}`))
+	store.CreateTask(ctx, task)
+
+	err := store.CreateTask(ctx, task)
+	if err != ErrAlreadyExists {
+		t.Errorf("expected ErrAlreadyExists, got %v", err)
+	}
+}
+
+func TestMemoryStore_UpdateTask_Nil(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	err := store.UpdateTask(ctx, nil)
+	if err != ErrInvalidInput {
+		t.Errorf("expected ErrInvalidInput, got %v", err)
+	}
+}
+
+func TestMemoryStore_UpdateTask_NotFound(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	task := core.NewTask("a", "b", "echo", json.RawMessage(`{}`))
+	err := store.UpdateTask(ctx, task)
+	if err != ErrNotFound {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestMemoryStore_DeleteTask_NotFound(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	err := store.DeleteTask(ctx, "nonexistent")
+	if err != ErrNotFound {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestMemoryStore_GetTask_NotFound(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	_, err := store.GetTask(ctx, "nonexistent")
+	if err != ErrNotFound {
+		t.Errorf("expected ErrNotFound, got %v", err)
+	}
+}
+
+func TestMemoryStore_ListAgents_WithStatusFilter(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	agent1 := core.NewAgent("Agent1", "1.0.0", "desc")
+	agent1.Endpoint = core.Endpoint{Host: "localhost", Port: 50051}
+	agent1.Status = core.StatusHealthy
+	store.CreateAgent(ctx, agent1)
+
+	agent2 := core.NewAgent("Agent2", "1.0.0", "desc")
+	agent2.Endpoint = core.Endpoint{Host: "localhost", Port: 50052}
+	agent2.Status = core.StatusUnhealthy
+	store.CreateAgent(ctx, agent2)
+
+	status := core.StatusHealthy
+	agents, _ := store.ListAgents(ctx, &AgentFilter{Status: &status})
+	if len(agents) != 1 {
+		t.Errorf("expected 1 healthy agent, got %d", len(agents))
+	}
+}
+
+func TestMemoryStore_ListAgents_WithTagsFilter(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	agent1 := core.NewAgent("Agent1", "1.0.0", "desc")
+	agent1.Endpoint = core.Endpoint{Host: "localhost", Port: 50051}
+	agent1.Metadata.Tags = []string{"production", "api"}
+	store.CreateAgent(ctx, agent1)
+
+	agent2 := core.NewAgent("Agent2", "1.0.0", "desc")
+	agent2.Endpoint = core.Endpoint{Host: "localhost", Port: 50052}
+	agent2.Metadata.Tags = []string{"staging"}
+	store.CreateAgent(ctx, agent2)
+
+	agents, _ := store.ListAgents(ctx, &AgentFilter{Tags: []string{"production"}})
+	if len(agents) != 1 {
+		t.Errorf("expected 1 agent with production tag, got %d", len(agents))
+	}
+}
+
+func TestMemoryStore_ListTasks_WithStatusFilter(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	task1 := core.NewTask("a", "b", "echo", json.RawMessage(`{}`))
+	task1.Status = core.TaskPending
+	store.CreateTask(ctx, task1)
+
+	task2 := core.NewTask("a", "b", "echo", json.RawMessage(`{}`))
+	task2.Status = core.TaskCompleted
+	store.CreateTask(ctx, task2)
+
+	status := core.TaskPending
+	tasks, _ := store.ListTasks(ctx, &TaskFilter{Status: &status})
+	if len(tasks) != 1 {
+		t.Errorf("expected 1 pending task, got %d", len(tasks))
+	}
+}
+
+func TestMemoryStore_ListTasks_WithFromAgentFilter(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	task1 := core.NewTask("agent-a", "agent-b", "echo", json.RawMessage(`{}`))
+	store.CreateTask(ctx, task1)
+
+	task2 := core.NewTask("agent-x", "agent-b", "echo", json.RawMessage(`{}`))
+	store.CreateTask(ctx, task2)
+
+	from := "agent-a"
+	tasks, _ := store.ListTasks(ctx, &TaskFilter{FromAgent: &from})
+	if len(tasks) != 1 {
+		t.Errorf("expected 1 task from agent-a, got %d", len(tasks))
+	}
+}
+
+func TestMemoryStore_ListTasks_Pagination(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	// Create 10 tasks
+	for i := 0; i < 10; i++ {
+		task := core.NewTask("a", "b", "echo", json.RawMessage(`{}`))
+		store.CreateTask(ctx, task)
+	}
+
+	// Test limit
+	limit := 5
+	tasks, _ := store.ListTasks(ctx, &TaskFilter{Limit: &limit})
+	if len(tasks) != 5 {
+		t.Errorf("expected 5 tasks with limit, got %d", len(tasks))
+	}
+
+	// Test offset
+	offset := 7
+	tasks, _ = store.ListTasks(ctx, &TaskFilter{Offset: &offset})
+	if len(tasks) != 3 {
+		t.Errorf("expected 3 tasks with offset 7, got %d", len(tasks))
+	}
+
+	// Test offset beyond length
+	offset = 20
+	tasks, _ = store.ListTasks(ctx, &TaskFilter{Offset: &offset})
+	if len(tasks) != 0 {
+		t.Errorf("expected 0 tasks with offset beyond length, got %d", len(tasks))
+	}
+}
+
+func TestMemoryStore_DeepCopy_Agent(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	agent := core.NewAgent("Agent", "1.0.0", "desc")
+	agent.Endpoint = core.Endpoint{Host: "localhost", Port: 50051}
+	agent.Capabilities = []core.Capability{{Name: "echo", Description: "Echo"}}
+	agent.Metadata.Tags = []string{"test"}
+	store.CreateAgent(ctx, agent)
+
+	// Get and modify
+	retrieved, _ := store.GetAgent(ctx, agent.ID)
+	retrieved.Capabilities[0].Name = "modified"
+	retrieved.Metadata.Tags[0] = "modified"
+
+	// Original should be unchanged
+	original, _ := store.GetAgent(ctx, agent.ID)
+	if original.Capabilities[0].Name == "modified" {
+		t.Error("original capability was modified - deep copy failed")
+	}
+	if original.Metadata.Tags[0] == "modified" {
+		t.Error("original tags were modified - deep copy failed")
+	}
+}
+
+func TestMemoryStore_DeepCopy_Task(t *testing.T) {
+	store := NewMemoryStore()
+	ctx := context.Background()
+
+	task := core.NewTask("a", "b", "echo", json.RawMessage(`{"key":"value"}`))
+	task.Result = json.RawMessage(`{"result":"data"}`)
+	store.CreateTask(ctx, task)
+
+	// Get and modify
+	retrieved, _ := store.GetTask(ctx, task.ID)
+	retrieved.Payload[0] = 'X'
+
+	// Original should be unchanged
+	original, _ := store.GetTask(ctx, task.ID)
+	if original.Payload[0] == 'X' {
+		t.Error("original payload was modified - deep copy failed")
+	}
+}
